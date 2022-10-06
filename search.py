@@ -47,5 +47,14 @@ def astar(maze, ispart1=False):
 # This is the same as backtrack from MP2
 def backtrack(visited_states, current_state):
     path = []
+    # Starting at the goal_state, iterate backwards on the best path until parent = None
+    state = current_state
+    while visited_states[state][0]:
+        path.append(state)
+        # path.insert(0, state)
+        state = visited_states[state][0]
+
+    path.append(state) # insert the initial state
+    path.reverse()
     return path
         
