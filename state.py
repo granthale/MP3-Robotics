@@ -14,7 +14,7 @@ def manhattan(a, b):
     @param b: a length-3 state tuple
     @return: the manhattan distance between a and b
     """
-    return 0
+    return abs(a[0] - b[0]) + abs(a[1] - b[1]) + abs(a[2] - b[2])
 
 
 from abc import ABC, abstractmethod
@@ -43,7 +43,7 @@ class AbstractState(ABC):
     def is_goal(self):
         pass
     
-    # A* requires we compute a heuristic from eahc state
+    # A* requires we compute a heuristic from each state
     # compute_heuristic should depend on self.state and self.goal
     # Return a float
     @abstractmethod
@@ -96,26 +96,51 @@ class MazeState(AbstractState):
         # that uses the Maze's getNeighbors function.
         neighboring_locs = self.maze_neighbors(*self.state, part1=ispart1)
 
+        # Do we need to do anything with isPart1?
+        
+        # Convert to MazeState objects in a similar fashion to mp2
+        for nbr in neighboring_locs:
+            new_state = MazeState(nbr, self.goal, self.dist_from_start + 1, self.maze, self.mst_cache, use_heuristic=True)
+            nbr_states.append(new_state)
+
         return nbr_states
 
     # TODO: implement this method
     def is_goal(self):
-        pass
+        return self.state in self.goal
+
 
     # TODO: implement these methods __hash__ AND __eq__
     def __hash__(self):
-        return 0
+        return hash(self.state)
     def __eq__(self, other):
-        return True
+        return self.state == other.state
 
     # TODO: implement this method
     # Our heuristic is: manhattan(self.state, nearest_goal). No need for MST.
     def compute_heuristic(self):
-        return 0
+        # Find the nearest goal and compute the manhattan distance to it
+        
+        nearest_distance = manhattan(self.goal[0], self.state)
+        for goal in self.goal:
+            distance = manhattan(goal, self.state)
+            if distance < nearest_distance:
+                nearest_distance = distance
+        
+        return nearest_distance
     
     # TODO: implement this method. It should be similar to MP 2
     def __lt__(self, other):
-        pass
+        self_dist = self.dist_from_start + self.h
+        other_dist = other.dist_from_start + other.h
+        # You should return True if the current state has a lower g + h value than "other"
+        if self_dist < other_dist:
+            return True
+        # If they have the same value then you should use tiebreak_idx to decide which is smaller
+        elif self_dist == other_dist:
+            if self.tiebreak_idx < other.tiebreak_idx:
+                return True
+        return False
     
     # str and repr just make output more readable when your print out states
     def __str__(self):
