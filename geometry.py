@@ -55,6 +55,7 @@ def is_alien_within_window(alien, window,granularity):
     return True
 
 def distance(point):
+    """Helper function encapsulating the distance formula"""
     return math.sqrt(point[0]**2 + point[1]**2)
 
 def point_segment_distance(point, segment):
@@ -91,6 +92,13 @@ def point_segment_distance(point, segment):
     else:
         return min(distance(ac), distance(bc))
     
+def opp_side_length(point, segment):
+    ab = (segment[1][0] - segment[0][0], segment[1][1] - segment[0][1])
+    ac = (point[0] - segment[0][0], point[1] - segment[0][1])
+    len_ab = distance(ab)
+
+    cross_prod = ab[0] * ac[1] - ab[1] * ac[0]
+    return cross_prod / len_ab
 
 def do_segments_intersect(segment1, segment2):
     """Determine whether segment1 intersects segment2.  
@@ -100,24 +108,48 @@ def do_segments_intersect(segment1, segment2):
         Args:
             segment1: A tuple of coordinates indicating the endpoints of segment1.
             segment2: A tuple of coordinates indicating the endpoints of segment2.
-
+ 
         Return:
             True if line segments intersect, False if not.
     """
+    # Determine whether or not sine changes sign from a segment's endpoint to both of the other segment's endpoints
+    
+    ac = (segment2[0][0] - segment1[0][0], segment2[0][1] - segment1[0][1])
+    ad = (segment2[1][0] - segment1[0][0], segment2[1][1] - segment1[0][1])
+    sin_ac = opp_side_length(segment1[0], segment2) / distance(ac)
+    sin_ad = opp_side_length(segment1[0], segment2) / distance(ad)
 
-    # Compute distance from each endpoint to segment
-    first_distance = point_segment_distance(segment1[0], segment2)
-    second_distance = point_segment_distance(segment1[1], segment2)
-    # Divide by |a| to leave sine
-    len_seg_A = math.sqrt((segment1[1][0] - segment1[0][0])^2 + (segment1[1][1] - segment1[0][1])^2)
-    first_sin = first_distance / len_seg_A
-    second_sin = second_distance / len_seg_A
-
-    # If the two signs were different to begin with, the line intersects
-    if first_sin / (-1 * first_sin) == second_sin / second_sin:
+    # If the lines have a change in sign, they have intersection potential
+    if (sin_ac >= 0 and sin_ad <= 0) or (sin_ac <= 0 and sin_ad >= 0):
         return True
-    # else
+    
+    # case 3: The endpoint of one segment is on the other segment
+    if sin_ac == 1: # check whether the other point changes sign
+        # check da (a-d), db (b-d), if the sign changes, they intersect
+        da = (segment1[0][0] - segment2[1][0], segment1[0][1] - segment2[1][1])
+        db = (segment1[1][0] - segment2[1][0], segment1[1][1] - segment2[1][1])
+        sin_da = opp_side_length(segment2[1], segment1) / distance(da)
+        sin_db = opp_side_length(segment2[1], segment1) / distance(db) 
+        if (sin_da >= 0 and sin_db <= 0) or (sin_da <= 0 and sin_db >= 0):
+            return True
+    elif sin_ad == 1: # check whether the other point changes sign
+        # check ca (a-c), cb (b-c), if the sign changes, they intersect
+        ca = (segment1[0][0] - segment2[0][0], segment1[0][1] - segment2[0][1])
+        cb = (segment1[1][0] - segment2[0][0], segment1[1][1] - segment2[0][1])
+        sin_ca = opp_side_length(segment2[0], segment1) / distance(ca)
+        sin_cb = opp_side_length(segment2[0], segment1) / distance(cb)
+        if (sin_ca >= 0 and sin_cb <= 0) or (sin_ca <= 0 and sin_cb >= 0):
+            return True
+
+    elif sin_ad == 1 and sin_ac == 1: # if the lines are collinear
+        # check whether or not the lines overlap
+        pass
+
+
+    # Determine whether or not a line not only is above or below, but also projects onto the current line
+    
     return False
+
 
 def segment_distance(segment1, segment2):
     """Compute the distance from segment1 to segment2.  You will need `do_segments_intersect`.
