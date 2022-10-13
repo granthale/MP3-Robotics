@@ -34,47 +34,50 @@ def transformToMaze(alien, goals, walls, window, granularity):
             Maze: the maze instance generated based on input arguments.
 
     """
-    # BE CAREFUL!
-    num_x_positions = window[0] / granularity + 1
-    num_y_positions = window[1] / granularity + 1
+    # BE CAREFUL! -> check minimum value
+    num_x_positions = int(window[0] / granularity + 1)
+    num_y_positions = int(window[1] / granularity + 1)
 
     # # # # Generate ASCII maze # # # #
 
     # Level 0 = "Horizontal", 1 = "Ball", 2 = "Vertical"
-    maze = [[[num_x_positions], [num_y_positions]], 
-            [[num_x_positions], num_y_positions], 
-            [[num_x_positions], [num_y_positions]]]
+    maze = np.full((num_x_positions, num_y_positions, 3), "%")
     
-    # Make a deep copy of alien...
+    # Make a deep copy of alien... (why?)
 
-    alien_start = alien.configToIdx(alien.get_config(), [0,0,0], granularity, alien)
+    alien_start = configToIdx(alien.get_config(), [0,0,0], granularity, alien)
     
-    for x in num_x_positions:
-        for y in num_y_positions:
-            config = idxToConfig([x, y], [0,0,0], granularity, alien)
+    for x in range(num_x_positions):
+        for y in range(num_y_positions):
             # Horizontal
-            alien.set_config([config[0], config[1], "Horizontal"])
-            if not is_alien_within_window(alien, window, granularity) or does_alien_touch_wall(alien, walls, granularity):
+            alien2 = copy.deepcopy(alien)
+            config = idxToConfig([x, y], [0,0,0], granularity, alien2)
+            alien2.set_alien_config([config[0], config[1], "Horizontal"])
+            if not is_alien_within_window(alien2, window, granularity) or does_alien_touch_wall(alien2, walls, granularity):
                 maze[0][x][y] = "%"
-            elif does_alien_touch_goal(alien, goals):
+            elif does_alien_touch_goal(alien2, goals):
                 maze[0][x][y] = "."
             else:
                 maze[0][x][y] = " "
             
             # Ball
-            alien.set_config([config[0], config[1], "Ball"])
-            if not is_alien_within_window(alien, window, granularity) or does_alien_touch_wall(alien, walls, granularity):
+            alien2 = copy.deepcopy(alien)
+            config = idxToConfig([x, y], [0,0,0], granularity, alien2)
+            alien2.set_alien_config([config[0], config[1], "Ball"])
+            if not is_alien_within_window(alien2, window, granularity) or does_alien_touch_wall(alien2, walls, granularity):
                 maze[1][x][y] = "%"
-            elif does_alien_touch_goal(alien, goals):
+            elif does_alien_touch_goal(alien2, goals):
                 maze[1][x][y] = "."
             else:
                 maze[1][x][y] = " "
 
             #Vertical
-            alien.set_config([config[0], config[1], "Vertical"])
-            if not is_alien_within_window(alien, window, granularity) or does_alien_touch_wall(alien, walls, granularity):
+            alien2 = copy.deepcopy(alien)
+            config = idxToConfig([x, y], [0,0,0], granularity, alien2)
+            alien2.set_alien_config([config[0], config[1], "Vertical"])
+            if not is_alien_within_window(alien2, window, granularity) or does_alien_touch_wall(alien2, walls, granularity):
                 maze[2][x][y] = "%"
-            elif does_alien_touch_goal(alien, goals):
+            elif does_alien_touch_goal(alien2, goals):
                 maze[2][x][y] = "."
             else:
                 maze[2][x][y] = " "
@@ -87,7 +90,8 @@ def transformToMaze(alien, goals, walls, window, granularity):
 
     # Instantiate Maze object
     gen_maze = Maze(maze, alien, granularity)
-    gen_maze.saveToFile()
+    gen_maze.saveToFile(f"./file/gran_{granularity}.txt")
+
     return gen_maze
     
 
