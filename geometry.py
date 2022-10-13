@@ -89,7 +89,7 @@ def does_alien_touch_goal(alien, goals):
 
     return False
 
-def is_alien_within_window(alien, window,granularity):
+def is_alien_within_window(alien, window, granularity):
     """Determine whether the alien stays within the window
         
         Args:
@@ -97,8 +97,57 @@ def is_alien_within_window(alien, window,granularity):
             window (tuple): (width, height) of the window
             granularity (int): The granularity of the map
     """
+    # if circle, check whether or not centroid + radius is outside the window
+    if alien.is_circle():
+        alien_radius = alien.get_width()
+        alien_centroid = alien.get_centroid()
+        # to the left
+        if alien_centroid[0] - alien_radius - (granularity / math.sqrt(2)) <= 0:
+            return False
+        # to the right
+        if alien_centroid[0] + alien_radius + (granularity / math.sqrt(2)) >= window[0]:
+            return False
+        # above
+        if alien_centroid[1] + alien_radius + (granularity / math.sqrt(2)) >= window[1]:
+            return False
+        # below
+        if alien_centroid[1] - alien_radius + (granularity / math.sqrt(2)) <= 0:
+            return False
 
     
+    elif alien.get_config()[2] == 'Horizontal':
+        d = alien.get_width()
+        alien_line_segment = alien.get_head_and_tail()
+        # to the left
+        if alien_line_segment[1][0] - (granularity / math.sqrt(2)) <= 0:
+            return False
+        # to the right
+        if alien_line_segment[0][0] + (granularity / math.sqrt(2)) >= window[0]:
+            return False
+        # above
+        if alien.get_centroid()[1] - d - (granularity / math.sqrt(2)) <= 0:
+            return False
+        # below
+        if alien.get_centroid()[1] + d + (granularity / math.sqrt(2)) >= window[1]:
+            return False
+        
+    
+    elif alien.get_config()[2] == 'Vertical':
+        d = alien.get_width()
+        alien_line_segment = alien.get_head_and_tail()
+        # to the left
+        if alien.get_centroid()[0] - d - (granularity / math.sqrt(2)) <= 0:
+            return False
+        # to the right
+        if alien.get_centroid()[0] + d + (granularity / math.sqrt(2)) >= window[0]:
+            return False
+        # above
+        if alien_line_segment[0][1] - d - (granularity / math.sqrt(2)) <= 0:
+            return False
+        # below
+        if alien_line_segment[1][1] + d + (granularity / math.sqrt(2)) >= window[1]:
+            return False
+
     return True
 
 def distance(point):
@@ -291,7 +340,7 @@ if __name__ == '__main__':
 
         touch_wall_result = does_alien_touch_wall(alien, walls, 0)
         touch_goal_result = does_alien_touch_goal(alien, goals)
-        # in_window_result = is_alien_within_window(alien, window, 0)
+        in_window_result = is_alien_within_window(alien, window, 0)
 
         assert touch_wall_result == truths[
             0], f'does_alien_touch_wall(alien, walls) with alien config {config} returns {touch_wall_result}, ' \
@@ -299,9 +348,9 @@ if __name__ == '__main__':
         assert touch_goal_result == truths[
             1], f'does_alien_touch_goal(alien, goals) with alien config {config} returns {touch_goal_result}, ' \
                 f'expected: {truths[1]}'
-        # assert in_window_result == truths[
-        #     2], f'is_alien_within_window(alien, window) with alien config {config} returns {in_window_result}, ' \
-        #         f'expected: {truths[2]}'
+        assert in_window_result == truths[
+            2], f'is_alien_within_window(alien, window) with alien config {config} returns {in_window_result}, ' \
+                f'expected: {truths[2]}'
 
 
     # Initialize Aliens and perform simple sanity check.
