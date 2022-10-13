@@ -97,55 +97,56 @@ def is_alien_within_window(alien, window, granularity):
             window (tuple): (width, height) of the window
             granularity (int): The granularity of the map
     """
+    gran = granularity / math.sqrt(2)
     # if circle, check whether or not centroid + radius is outside the window
     if alien.is_circle():
         alien_radius = alien.get_width()
         alien_centroid = alien.get_centroid()
         # to the left
-        if alien_centroid[0] - alien_radius - (granularity / math.sqrt(2)) <= 0:
+        if alien_centroid[0] - alien_radius - gran <= 0:
             return False
         # to the right
-        if alien_centroid[0] + alien_radius + (granularity / math.sqrt(2)) >= window[0]:
+        if alien_centroid[0] + alien_radius + gran >= window[0]:
             return False
         # above
-        if alien_centroid[1] + alien_radius + (granularity / math.sqrt(2)) >= window[1]:
+        if alien_centroid[1] + alien_radius + gran >= window[1]:
             return False
         # below
-        if alien_centroid[1] - alien_radius + (granularity / math.sqrt(2)) <= 0:
+        if alien_centroid[1] - alien_radius + gran <= 0:
             return False
 
     
-    elif alien.get_config()[2] == 'Horizontal':
+    elif alien.get_shape() == 'Horizontal':
         d = alien.get_width()
         alien_line_segment = alien.get_head_and_tail()
         # to the left
-        if alien_line_segment[1][0] - (granularity / math.sqrt(2)) <= 0:
+        if alien_line_segment[1][0] - gran <= 0:
             return False
         # to the right
-        if alien_line_segment[0][0] + (granularity / math.sqrt(2)) >= window[0]:
+        if alien_line_segment[0][0] + gran >= window[0]:
             return False
         # above
-        if alien.get_centroid()[1] - d - (granularity / math.sqrt(2)) <= 0:
+        if alien.get_centroid()[1] - d - gran <= 0:
             return False
         # below
-        if alien.get_centroid()[1] + d + (granularity / math.sqrt(2)) >= window[1]:
+        if alien.get_centroid()[1] + d + gran >= window[1]:
             return False
         
     
-    elif alien.get_config()[2] == 'Vertical':
+    elif alien.get_shape() == 'Vertical':
         d = alien.get_width()
         alien_line_segment = alien.get_head_and_tail()
         # to the left
-        if alien.get_centroid()[0] - d - (granularity / math.sqrt(2)) <= 0:
+        if alien.get_centroid()[0] - d - gran <= 0:
             return False
         # to the right
-        if alien.get_centroid()[0] + d + (granularity / math.sqrt(2)) >= window[0]:
+        if alien.get_centroid()[0] + d + gran >= window[0]:
             return False
         # above
-        if alien_line_segment[0][1] - d - (granularity / math.sqrt(2)) <= 0:
+        if alien_line_segment[0][1] - d - gran <= 0:
             return False
         # below
-        if alien_line_segment[1][1] + d + (granularity / math.sqrt(2)) >= window[1]:
+        if alien_line_segment[1][1] + d + gran >= window[1]:
             return False
 
     return True
@@ -189,13 +190,16 @@ def point_segment_distance(point, segment):
         return min(distance(ac), distance(bc))
 
 
+### referencing https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
+###
 def onSegment(p, q, r):
     if ( (q.x <= max(p.x, r.x)) and (q.x >= min(p.x, r.x)) and 
            (q.y <= max(p.y, r.y)) and (q.y >= min(p.y, r.y))):
         return True
     return False
 
-
+### referencing https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
+###
 # to find the orientation of an ordered triplet (p,q,r)
 def orientation(p, q, r):
     # function returns the following values:
@@ -213,7 +217,8 @@ def orientation(p, q, r):
         # Collinear orientation
         return 0
 
-
+### referencing https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
+###
 def do_segments_intersect(segment1, segment2):
     """Determine whether segment1 intersects segment2.  
     We recommend implementing the above first, and drawing down and considering some examples.

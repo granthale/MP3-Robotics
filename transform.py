@@ -21,7 +21,7 @@ from const import *
 from utils import *
 import os
 
-def transformToMaze(alien, goals, walls, window,granularity):
+def transformToMaze(alien, goals, walls, window, granularity):
     """This function transforms the given 2D map to the maze in MP1.
     
         Args:
@@ -34,6 +34,55 @@ def transformToMaze(alien, goals, walls, window,granularity):
             Maze: the maze instance generated based on input arguments.
 
     """
+    num_x_positions = window[0] / granularity + 1
+    num_y_positions = window[1] / granularity + 1
+
+    # # # # Generate ASCII maze # # # #
+
+    # Level 0 = "Horizontal", 1 = "Ball", 2 = "Vertical"
+    maze = [[[num_x_positions], [num_y_positions]], 
+            [[num_x_positions], num_y_positions], 
+            [[num_x_positions], [num_y_positions]]]
+    alien_start = alien.get_centroid()
+
+    for x in num_x_positions:
+        for y in num_y_positions:
+            # Horizontal
+            alien.set_config([x, y, "Horizontal"])
+            if not is_alien_within_window(alien, window, granularity) or does_alien_touch_wall(alien, walls, granularity):
+                maze[0][x][y] = "%"
+            elif does_alien_touch_goal(alien, goals):
+                maze[0][x][y] = "."
+            else:
+                maze[0][x][y] = " "
+            
+            # Ball
+            alien.set_config([x, y, "Ball"])
+            if not is_alien_within_window(alien, window, granularity) or does_alien_touch_wall(alien, walls, granularity):
+                maze[1][x][y] = "%"
+            elif does_alien_touch_goal(alien, goals):
+                maze[1][x][y] = "."
+            else:
+                maze[0][x][y] = " "
+
+            #Vertical
+            alien.set_config([x, y, "Vertical"])
+            if not is_alien_within_window(alien, window, granularity) or does_alien_touch_wall(alien, walls, granularity):
+                maze[2][x][y] = "%"
+            elif does_alien_touch_goal(alien, goals):
+                maze[2][x][y] = "."
+            else:
+                maze[0][x][y] = " "
+            
+    # Replace start coordinate in ball maze with "P"
+    maze[1][alien_start[0]][alien_start[1]] = "P"
+    
+    
+    # Instantiate Maze object
+
+    
+    # Save Maze object to a file by calling maze.saveToFile(FILENAME)
+    gen_maze.saveToFile("file")
     pass
 
 if __name__ == '__main__':
