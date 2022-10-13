@@ -116,37 +116,25 @@ def is_alien_within_window(alien, window, granularity):
             return False
 
     
-    elif alien.get_shape() == 'Horizontal':
+    else:
         d = alien.get_width()
         alien_line_segment = alien.get_head_and_tail()
+        head = alien_line_segment[0]
+        tail = alien_line_segment[1]
+
+        head_x, head_y = head
+        tail_x, tail_y = tail
         # to the left
-        if alien_line_segment[1][0] - gran <= 0:
+        if tail_x - d <= gran:
             return False
         # to the right
-        if alien_line_segment[0][0] + gran >= window[0]:
+        if head_x + gran + d >= window[0]:
             return False
         # above
-        if alien.get_centroid()[1] - d - gran <= 0:
+        if head_y - d <= gran:
             return False
         # below
-        if alien.get_centroid()[1] + d + gran >= window[1]:
-            return False
-        
-    
-    elif alien.get_shape() == 'Vertical':
-        d = alien.get_width()
-        alien_line_segment = alien.get_head_and_tail()
-        # to the left
-        if alien.get_centroid()[0] - d - gran <= 0:
-            return False
-        # to the right
-        if alien.get_centroid()[0] + d + gran >= window[0]:
-            return False
-        # above
-        if alien_line_segment[0][1] - d - gran <= 0:
-            return False
-        # below
-        if alien_line_segment[1][1] + d + gran >= window[1]:
+        if tail_y + d + gran >= window[1]:
             return False
 
     return True

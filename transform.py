@@ -34,6 +34,7 @@ def transformToMaze(alien, goals, walls, window, granularity):
             Maze: the maze instance generated based on input arguments.
 
     """
+    # BE CAREFUL!
     num_x_positions = window[0] / granularity + 1
     num_y_positions = window[1] / granularity + 1
 
@@ -43,12 +44,16 @@ def transformToMaze(alien, goals, walls, window, granularity):
     maze = [[[num_x_positions], [num_y_positions]], 
             [[num_x_positions], num_y_positions], 
             [[num_x_positions], [num_y_positions]]]
-    alien_start = alien.get_centroid()
+    
+    # Make a deep copy of alien...
 
+    alien_start = alien.configToIdx(alien.get_config(), [0,0,0], granularity, alien)
+    
     for x in num_x_positions:
         for y in num_y_positions:
+            config = idxToConfig([x, y], [0,0,0], granularity, alien)
             # Horizontal
-            alien.set_config([x, y, "Horizontal"])
+            alien.set_config([config[0], config[1], "Horizontal"])
             if not is_alien_within_window(alien, window, granularity) or does_alien_touch_wall(alien, walls, granularity):
                 maze[0][x][y] = "%"
             elif does_alien_touch_goal(alien, goals):
@@ -57,33 +62,34 @@ def transformToMaze(alien, goals, walls, window, granularity):
                 maze[0][x][y] = " "
             
             # Ball
-            alien.set_config([x, y, "Ball"])
+            alien.set_config([config[0], config[1], "Ball"])
             if not is_alien_within_window(alien, window, granularity) or does_alien_touch_wall(alien, walls, granularity):
                 maze[1][x][y] = "%"
             elif does_alien_touch_goal(alien, goals):
                 maze[1][x][y] = "."
             else:
-                maze[0][x][y] = " "
+                maze[1][x][y] = " "
 
             #Vertical
-            alien.set_config([x, y, "Vertical"])
+            alien.set_config([config[0], config[1], "Vertical"])
             if not is_alien_within_window(alien, window, granularity) or does_alien_touch_wall(alien, walls, granularity):
                 maze[2][x][y] = "%"
             elif does_alien_touch_goal(alien, goals):
                 maze[2][x][y] = "."
             else:
-                maze[0][x][y] = " "
+                maze[2][x][y] = " "
             
-    # Replace start coordinate in ball maze with "P"
-    maze[1][alien_start[0]][alien_start[1]] = "P"
-    
-    
-    # Instantiate Maze object
+    # Replace start coordinate in maze with "P"
+    shape = 0
+    if config[2] == "Ball": shape = 1
+    if config[2] == "Vertical": shape = 2
+    maze[shape][alien_start[0]][alien_start[1]] = "P"
 
+    # Instantiate Maze object
+    gen_maze = Maze(maze, alien, granularity)
+    gen_maze.saveToFile()
+    return gen_maze
     
-    # Save Maze object to a file by calling maze.saveToFile(FILENAME)
-    gen_maze.saveToFile("file")
-    pass
 
 if __name__ == '__main__':
     import configparser
