@@ -18,11 +18,6 @@ import numpy as np
 from alien import Alien
 from typing import List, Tuple
 
-class Point:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
 def does_alien_touch_wall(alien, walls, granularity):
     """Determine whether the alien touches a wall
 
@@ -103,19 +98,18 @@ def is_alien_within_window(alien, window, granularity):
         alien_radius = alien.get_width()
         alien_centroid = alien.get_centroid()
         # to the left
-        if alien_centroid[0] - alien_radius - gran <= 0:
+        if np.isclose(alien_centroid[0] - alien_radius, gran) or alien_centroid[0] - alien_radius < gran:
             return False
         # to the right
-        if alien_centroid[0] + alien_radius + gran >= window[0]:
+        if np.isclose(alien_centroid[0] + alien_radius + gran, window[0]) or alien_centroid[0] + alien_radius + gran > window[0]:
             return False
         # above
-        if alien_centroid[1] + alien_radius + gran >= window[1]:
+        if np.isclose(alien_centroid[1] + alien_radius + gran, window[1]) or  alien_centroid[1] + alien_radius + gran > window[1]:
             return False
         # below
-        if alien_centroid[1] - alien_radius + gran <= 0:
+        if np.isclose(alien_centroid[1] - alien_radius + gran, 0) or alien_centroid[1] - alien_radius + gran < 0:
             return False
 
-    
     else:
         d = alien.get_width()
         alien_line_segment = alien.get_head_and_tail()
@@ -125,16 +119,16 @@ def is_alien_within_window(alien, window, granularity):
         head_x, head_y = head
         tail_x, tail_y = tail
         # to the left
-        if tail_x - d <= gran:
+        if np.isclose(tail_x - d, gran) or tail_x - d < gran:
             return False
         # to the right
-        if head_x + gran + d >= window[0]:
+        if np.isclose(head_x + gran + d, window[0]) or head_x + gran + d > window[0]:
             return False
         # above
-        if head_y - d <= gran:
+        if np.isclose(head_y - d, gran) or head_y - d < gran:
             return False
         # below
-        if tail_y + d + gran >= window[1]:
+        if np.isclose(tail_y + d + gran, window[1]) or tail_y + d + gran > window[1]:
             return False
 
     return True
@@ -181,8 +175,8 @@ def point_segment_distance(point, segment):
 ### referencing https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
 ###
 def onSegment(p, q, r):
-    if ( (q.x <= max(p.x, r.x)) and (q.x >= min(p.x, r.x)) and 
-           (q.y <= max(p.y, r.y)) and (q.y >= min(p.y, r.y))):
+    if ( (q[0] <= max(p[0], r[0])) and (q[0] >= min(p[0], r[0])) and 
+           (q[1] <= max(p[1], r[1])) and (q[1] >= min(p[1], r[1]))):
         return True
     return False
 
@@ -194,7 +188,7 @@ def orientation(p, q, r):
     # 0 : Collinear points
     # 1 : Clockwise points
     # 2 : Counterclockwise
-    val = (float(q.y - p.y) * (r.x - q.x)) - (float(q.x - p.x) * (r.y - q.y))
+    val = (float(q[1] - p[1]) * (r[0] - q[0])) - (float(q[0] - p[0]) * (r[1] - q[1]))
     if (val > 0):
         # Clockwise orientation
         return 1
@@ -220,10 +214,10 @@ def do_segments_intersect(segment1, segment2):
             True if line segments intersect, False if not.
     """
     
-    p1 = Point(segment1[0][0], segment1[0][1])
-    q1 = Point(segment1[1][0], segment1[1][1])
-    p2 = Point(segment2[0][0], segment2[0][1])
-    q2 = Point(segment2[1][0], segment2[1][1])
+    p1 = (segment1[0][0], segment1[0][1])
+    q1 = (segment1[1][0], segment1[1][1])
+    p2 = (segment2[0][0], segment2[0][1])
+    q2 = (segment2[1][0], segment2[1][1])
 
     # Find the 4 orientations required for 
     # the general and special cases
