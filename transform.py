@@ -21,9 +21,6 @@ from const import *
 from utils import *
 import os
 
-# For use in naming outputted mazes
-COUNT = 0
-
 def transformToMaze(alien, goals, walls, window, granularity):
     """This function transforms the given 2D map to the maze in MP1.
     
@@ -61,7 +58,7 @@ def transformToMaze(alien, goals, walls, window, granularity):
 
                 if not is_alien_within_window(alien2, window, granularity) or does_alien_touch_wall(alien2, walls, granularity):
                     maze[x][y][shape] = "%"
-                    # Potential optimizations
+                    # Potential optimizations -> possible toDo in the future
                         # if vertical and y = 0, skip rest of row
                         # if horizontal and x = 0, skip rest of column
                 elif does_alien_touch_goal(alien2, goals):
@@ -77,11 +74,7 @@ def transformToMaze(alien, goals, walls, window, granularity):
     if config[2] == "Vertical": shape = 2
     maze[alien_start[0]][alien_start[1]][shape] = "P"
 
-    # Instantiate Maze object
-    global COUNT
     gen_maze = Maze(maze, alien, granularity)
-    gen_maze.saveToFile(f"./gen_mazes/{COUNT}_gran_{granularity}.txt")
-    COUNT += 1
 
     return gen_maze
     

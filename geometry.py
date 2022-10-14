@@ -156,13 +156,17 @@ def point_segment_distance(point, segment):
     ac = (point[0] - segment[0][0], point[1] - segment[0][1])
     dot_ab_ac = ab[0] * ac[0] + ab[1] * ac[1]
     len_ab = distance(ab)
-    cos_ab_ac = dot_ab_ac / len_ab
+    cos_ab_ac = -1 # Accounts for case when len_ab == 0
+    if (len_ab != 0): 
+        cos_ab_ac = dot_ab_ac / len_ab
 
     ba = (segment[0][0] - segment[1][0], segment[0][1] - segment[1][1])
     bc = (point[0] - segment[1][0], point[1] - segment[1][1])
     dot_ba_bc = ba[0] * bc[0] + ba[1] * bc[1]
     len_ba = distance(ba)
-    cos_ba_bc = dot_ba_bc / len_ba
+    cos_ba_bc = -1 # Accounts for case when len_ba == 0
+    if (len_ba != 0):
+        cos_ba_bc = dot_ba_bc / len_ba
 
     if cos_ab_ac > 0 and cos_ba_bc > 0:
         cross_prod = ab[0] * ac[1] - ab[1] * ac[0]
